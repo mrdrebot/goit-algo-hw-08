@@ -1,6 +1,7 @@
 from functools import wraps
 from typing import Callable
 from classes_library import AddressBook, Record
+import pickle
 
 def parse_input(user_input: str) -> tuple:
     cmd, *args = user_input.split()
@@ -95,8 +96,22 @@ def show_birthday(args, book: AddressBook):
 def birthdays(book: AddressBook):
     return book.get_upcoming_birthdays()
     
+filename = "book_database.pkl"
+
+def read_book_from_file(filename):
+    try:
+        with open(filename, "rb") as base:
+            return pickle.load(base)
+    except FileNotFoundError  as e:
+        print(f"{ e }\nThe base has not found! Create the new base.")
+        return AddressBook()
+
+def write_book_to_file(filename, book: AddressBook):
+    with open(filename, "wb") as base:
+        pickle.dump(book, base)
+      
 def main():
-    book = AddressBook()
+    book = read_book_from_file(filename)
     print("Welcome to the assistant bot!")
 
     while True:
@@ -106,6 +121,7 @@ def main():
 
             match command:
                 case "close" | "exit":
+                    write_book_to_file(filename, book)
                     print("Good bye!")
                     break
                 case "hello":
